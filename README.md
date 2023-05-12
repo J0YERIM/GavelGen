@@ -47,7 +47,24 @@
 2. 프로젝트의 루트 디렉토리로 이동합니다.
 
 
-3. 터미널 또는 명령 프롬프트를 열고, 다음 명령을 실행하여 프로젝트 종속성을 설치합니다.
+3. 터미널 또는 명령 프롬프트를 열고, 다음 명령을 실행하여 가상환경을 설정합니다.
+
+
+* Windows
+```
+python -m venv venv
+source venv\Scripts\activate
+```
+
+
+* macOS/Linux
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+
+4. 가상환경이 활성화된 상태에서, 다음 명령을 실행하여 프로젝트 종속성을 설치합니다.
 
 
 ```
@@ -55,7 +72,10 @@ pip install -r requirements.txt
 ```
 
 
-4. 데이터베이스 마이그레이션을 적용하기 위해 다음 명령을 실행합니다.
+5. 따로 첨부한 secrets.json 파일을 추가합니다. 해당 파일에는 필요한 시크릿 키를 설정합니다.
+
+
+6. 데이터베이스 마이그레이션을 적용하기 위해 다음 명령을 실행합니다.
 
 
 ```
@@ -63,7 +83,7 @@ python manage.py migrate
 ```
 
 
-5. 애플리케이션을 실행하기 위해 다음 명령을 실행합니다.
+7. 애플리케이션을 실행하기 위해 다음 명령을 실행합니다.
 
 
 ```
@@ -71,7 +91,7 @@ python manage.py runserver
 ```
 
 
-6. 웹 브라우저를 열고 http://localhost:8080 주소로 접속하여 GavelGen을 이용할 수 있습니다.
+8. 웹 브라우저를 열고 http://localhost:8080 주소로 접속하여 GavelGen을 이용할 수 있습니다.
 
 
 
