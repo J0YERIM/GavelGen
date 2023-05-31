@@ -5,6 +5,7 @@
 {% if user.is_authenticated %}
     <h1>{{ user.username }}님, 안녕하세요:)</h1></br>
     <h2><a href="{% url 'users:profile' %}">회원 정보 조회</a></h2>
+    <h2><a href="{% url 'products:product_list' %}">상품 조회</a></h2>
 {% else %}
   <h1 class="display-4 font-weight-bold">GavelGen에 오신 것을 환영합니다!</h1>
   <p class="lead">저희 서비스는 경매를 통해 다양한 상품을 구매하고 판매할 수 있는 플랫폼을 제공합니다.</p>

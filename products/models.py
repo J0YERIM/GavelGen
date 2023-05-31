@@ -7,17 +7,22 @@ class Product(models.Model):
     content = models.TextField()
     starting_price = models.PositiveIntegerField()
     current_price = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', blank=True)
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # foreign key
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='products')
-    participants = models.ManyToManyField(User, related_name='participated_products')
-    tags = models.ManyToManyField('Tag', related_name='products')
+    participants = models.ManyToManyField(User, related_name='participated_products', blank=True)
+    tags = models.ManyToManyField('Tag', related_name='products', blank=True)
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.current_price = self.starting_price
+        super().save(*args, **kwargs)
 
 
 class Tag(models.Model):

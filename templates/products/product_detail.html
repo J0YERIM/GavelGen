@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Title: {{ product.title }}</h1>
+  <p>Content: {{ product.content }}</p>
+  <p>Username: {{ product.user.username }}</p>
+  <p>Starting Price: {{ product.starting_price }}</p>
+  <p>Current Price: {{ product.current_price }}</p>
+  {% if product.status %}
+    <p>Status: 판매중</p>
+  {% else %}
+    <p>Status: 판매종료</p>
+  {% endif %}
+  <p>Created: {{ product.created_at }}</p>
+  <p>Updated: {{ product.updated_at }}</p>
+  {% for tag in product.tags.all %}
+    <p>tag: {{ tag }}</p>
+  {% endfor %}
+  {% for participants in product.participants.all %}
+    <p>tag: {{ participants }}</p>
+  {% endfor %}
+  {% if product.image %}
+    <img src="{{ product.image.url }}" alt="Product Image">
+  {% endif %}
+
+  <br><br>
+  {% if request.user == product.user %}
+    <a href="{% url 'products:product_update' product.id %}">Edit</a>
+    <a href="{% url 'products:product_delete' product.id %}">Delete</a>
+  {% endif %}
+{% endblock %}
