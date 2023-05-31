@@ -47,7 +47,7 @@ class Heart(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='hearts')
 
     def __str__(self):
-        return f'사용자: {self.member}, 상품: {self.product}'
+        return f'사용자: {self.user}, 상품: {self.product}'
 
 
 class Report(models.Model):
@@ -60,3 +60,6 @@ class Report(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # foreign key
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports')
+
+    def __str__(self):
+        return self.title
