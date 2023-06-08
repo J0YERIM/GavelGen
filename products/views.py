@@ -6,7 +6,7 @@ from django.views import View
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Product, Tag, Comment, Heart, Report
-from .forms import ProductForm, ProductUpdateForm, ReportForm
+from .forms import ProductForm, ProductUpdateForm, ReportForm, CommentForm
 from django.http import Http404
 
 
@@ -27,6 +27,7 @@ class ProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['user_likes_this'] = self.object.hearts.filter(user=self.request.user).exists()
         context['liked_users'] = self.object.hearts.all()
+        context['comment_form'] = CommentForm()
         return context
 
 
@@ -130,7 +131,6 @@ class ReportDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         raise Http404()
 
 
-
 def toggle_heart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if not request.user.is_authenticated:
@@ -141,3 +141,47 @@ def toggle_heart(request, product_id):
         heart.delete()
 
     return HttpResponseRedirect(reverse('products:product_detail', args=(product.id,)))
+
+
+def add_comment(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.user = request.user
+            comment.product = product
+            comment.save()
+    return redirect('products:product_detail', pk=product.pk)
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'products/comment_form.html'
+    context_object_name = 'comment'
+
+    def test_func(self):
+        comment = self.get_object()
+        if self.request.user == comment.user:
+            return True
+        return False
+
+    def get_success_url(self):
+        return reverse('products:product_detail', args=[self.object.product.id])
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'products/comment_confirm_delete.html'
+    context_object_name = 'comment'
+
+    def test_func(self):
+        comment = self.get_object()
+        if self.request.user == comment.user:
+            return True
+        return False
+
+    def get_success_url(self):
+        return reverse('products:product_detail', args=[self.object.product.id])

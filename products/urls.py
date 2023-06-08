@@ -16,6 +16,8 @@ urlpatterns = [
     path('reports/<int:pk>/delete/', ReportDeleteView.as_view(), name='report_delete'),
 
     path('products/<int:product_id>/toggle_heart/', toggle_heart, name='toggle_heart'),
-    # path('heart/list/', HeartListView.as_view(), name='heart_list'),
-]
+    path('products/<int:product_id>/comment/', add_comment, name='add_comment'),
 
+    path('comments/<int:pk>/update/', CommentUpdateView.as_view(), name='comment_update'),
+    path('comments/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment_delete'),
+]

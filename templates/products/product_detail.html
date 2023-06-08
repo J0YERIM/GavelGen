@@ -39,8 +39,29 @@
   {% endfor %}
 </ul>
 
+<h3>Comments:</h3>
+  <ul>
+    {% for comment in product.comments.all %}
+      <li>{{ comment.content }} (by {{ comment.user.username }})
+        {% if request.user == comment.user %}
+          <a href="{% url 'products:comment_update' comment.id %}">Edit</a>
+          <a href="{% url 'products:comment_delete' comment.id %}">Delete</a>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>No comments yet.</li>
+    {% endfor %}
+  </ul>
 
-
+{% if user.is_authenticated %}
+  <form method="post" action="{% url 'products:add_comment' product.id %}">
+    {% csrf_token %}
+    {{ comment_form.as_p }}
+    <button type="submit">Add Comment</button>
+  </form>
+{% else %}
+  <p>Please login to add comments.</p>
+{% endif %}
 
   <br><br>
   {% if request.user == product.user %}

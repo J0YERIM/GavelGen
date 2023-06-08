@@ -42,7 +42,7 @@ class Comment(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
 
     def __str__(self):
-        return self.content
+        return f"Comment by {self.user.username} on {self.product.title}"
 
 
 class Heart(models.Model):
