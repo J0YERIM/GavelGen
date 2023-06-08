@@ -58,9 +58,9 @@ class Heart(models.Model):
 class Report(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
-    image = models.ImageField(upload_to='reports/')
+    image = models.ImageField(upload_to='products/', blank=True)
     admin_check = models.BooleanField(default=False)
-    admin_response = models.TextField()
+    admin_response = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # foreign key

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Report List</h1>
+
+  {% if user.is_authenticated %}
+  <a href="{% url 'products:report_create' %}">고객 신고 등록</a>
+  {% endif %}
+
+  {% for report in report_list %}
+    <h2><a href="{% url 'products:report_detail' report.id %}">{{ report.title }}</a></h2>
+  {% endfor %}
+{% endblock %}

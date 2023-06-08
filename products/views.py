@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Product, Tag, Comment, Heart, Report
-from .forms import ProductForm, ProductUpdateForm
+from .forms import ProductForm, ProductUpdateForm, ReportForm
 from django.http import Http404
 
 
@@ -60,6 +60,61 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         else:
             return False
+
+    def handle_no_permission(self):
+        raise Http404()
+
+
+class ReportListView(ListView):
+    model = Report
+    template_name = 'products/report_list.html'
+    context_object_name = 'report_list'
+
+
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'products/report_detail.html'
+    context_object_name = 'report'
+
+
+class ReportCreateView(LoginRequiredMixin, CreateView):
+    model = Report
+    form_class = ReportForm
+    template_name = 'products/report_form.html'
+    success_url = reverse_lazy('products:report_list')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class ReportUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Report
+    form_class = ReportForm
+    template_name = 'products/report_form.html'
+    success_url = reverse_lazy('products:report_list')
+
+    def test_func(self):
+        report = self.get_object()
+        if self.request.user == report.user:
+            return True
+        return False
+
+    def handle_no_permission(self):
+        raise Http404()
+
+
+class ReportDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Report
+    template_name = 'products/report_confirm_delete.html'
+    success_url = reverse_lazy('products:report_list')
+    context_object_name = 'report'
+
+    def test_func(self):
+        report = self.get_object()
+        if self.request.user == report.user:
+            return True
+        return False
 
     def handle_no_permission(self):
         raise Http404()
