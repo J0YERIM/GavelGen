@@ -9,6 +9,7 @@
   <p>Created: {{ report.created_at }}</p>
   <p>Updated: {{ report.updated_at }}</p>
   <p>Submitted by: {{ report.user.username }}</p>
+
   <a href="{% url 'products:report_update' report.id %}">Edit</a>
   <a href="{% url 'products:report_delete' report.id %}">Delete</a>
 {% endblock %}

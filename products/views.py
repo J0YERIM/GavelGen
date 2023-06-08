@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views import View
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from .models import Product, Tag, Comment, Heart, Report
 from .forms import ProductForm, ProductUpdateForm, ReportForm
 from django.http import Http404
@@ -19,6 +22,12 @@ class ProductListView(ListView):
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_likes_this'] = self.object.hearts.filter(user=self.request.user).exists()
+        context['liked_users'] = self.object.hearts.all()
+        return context
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -53,6 +62,7 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Product
     template_name = 'products/product_confirm_delete.html'
     success_url = reverse_lazy('products:product_list')
+    context_object_name = 'product'
 
     def test_func(self):
         product = self.get_object()
@@ -118,3 +128,16 @@ class ReportDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def handle_no_permission(self):
         raise Http404()
+
+
+
+def toggle_heart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('products:product_detail', args=(product.id,)))
+
+    heart, created = Heart.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        heart.delete()
+
+    return HttpResponseRedirect(reverse('products:product_detail', args=(product.id,)))

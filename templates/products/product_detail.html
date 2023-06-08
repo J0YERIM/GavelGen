@@ -23,6 +23,25 @@
     <img src="{{ product.image.url }}" alt="Product Image">
   {% endif %}
 
+
+    <br><br>
+{% if request.user.is_authenticated %}
+  <form method="post" action="{% url 'products:toggle_heart' product.id %}">
+    {% csrf_token %}
+    <input type="submit" value="{% if user_likes_this %}Remove Heart{% else %}Add Heart{% endif %}">
+  </form>
+{% endif %}
+
+<h3>Liked by:</h3>
+<ul>
+  {% for liked_user in liked_users %}
+    <li>{{ liked_user.user.username }}</li>
+  {% endfor %}
+</ul>
+
+
+
+
   <br><br>
   {% if request.user == product.user %}
     <a href="{% url 'products:product_update' product.id %}">Edit</a>

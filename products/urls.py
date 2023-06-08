@@ -2,7 +2,6 @@ from django.urls import path
 from .views import *
 
 app_name = 'products'
-
 urlpatterns = [
     path('products/', ProductListView.as_view(), name='product_list'),
     path('products/<int:pk>/', ProductDetailView.as_view(), name='product_detail'),
@@ -15,4 +14,8 @@ urlpatterns = [
     path('reports/new/', ReportCreateView.as_view(), name='report_create'),
     path('reports/<int:pk>/edit/', ReportUpdateView.as_view(), name='report_update'),
     path('reports/<int:pk>/delete/', ReportDeleteView.as_view(), name='report_delete'),
+
+    path('products/<int:product_id>/toggle_heart/', toggle_heart, name='toggle_heart'),
+    # path('heart/list/', HeartListView.as_view(), name='heart_list'),
 ]
+
