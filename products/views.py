@@ -3,10 +3,10 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views import View
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from .models import Product, Tag, Comment, Heart, Report
-from .forms import ProductForm, ProductUpdateForm, ReportForm, CommentForm
+from .forms import ProductForm, ProductUpdateForm, ReportForm, CommentForm, TagForm
 from django.http import Http404
 
 
@@ -41,6 +41,26 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag_form'] = TagForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.instance.user = self.request.user
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        if self.request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            return JsonResponse(form.errors, status=400)
+        else:
+            return response
+
 
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
@@ -57,6 +77,40 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def handle_no_permission(self):
         raise Http404()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['tag_form'] = TagForm(self.request.POST)
+        else:
+            context['tag_form'] = TagForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        if self.request.is_ajax():
+            return JsonResponse(form.errors, status=400)
+        else:
+            return response
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.object.tags.clear()
+        tags = form.cleaned_data.get('tags').split(',')
+        for tag in tags:
+            tag = tag.strip()
+            if tag:
+                obj, created = Tag.objects.get_or_create(name=tag)
+                self.object.tags.add(obj)
+        return response
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -185,3 +239,9 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('products:product_detail', args=[self.object.product.id])
+
+
+class TagListView(ListView):
+    model = Tag
+    template_name = 'products/tag_list.html'
+    context_object_name = 'tag_list'
