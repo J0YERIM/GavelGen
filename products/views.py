@@ -1,3 +1,4 @@
+from django.db.models import Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -8,6 +9,7 @@ from django.urls import reverse
 from .models import Product, Tag, Comment, Heart, Report
 from .forms import ProductForm, ProductUpdateForm, ReportForm, CommentForm, TagForm
 from django.http import Http404
+from django.contrib import messages
 
 
 def index(request):
@@ -28,7 +30,21 @@ class ProductDetailView(DetailView):
         context['user_likes_this'] = self.object.hearts.filter(user=self.request.user).exists()
         context['liked_users'] = self.object.hearts.all()
         context['comment_form'] = CommentForm()
+
+        product = self.object
+        participants_records = product.participants_records.all().order_by('-current_price')
+        participants = [(record.user.username, record.current_price) for record in participants_records]
+        context['participants'] = participants
         return context
+
+    def post(self, request, *args, **kwargs):
+        product = self.get_object()
+        price = int(request.POST.get('price', 0))
+        if product.participate_in_auction(price, request.user):
+            messages.success(request, '경매에 참여하였습니다.')
+        else:
+            messages.error(request, '현재 가격 이상의 가격을 입력해주세요.')
+        return redirect('products:product_detail', pk=product.id)
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):

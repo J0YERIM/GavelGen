@@ -68,4 +68,23 @@
     <a href="{% url 'products:product_update' product.id %}">Edit</a>
     <a href="{% url 'products:product_delete' product.id %}">Delete</a>
   {% endif %}
+
+    {%  if not request.user == product.user %}
+        <form method="post" action="{% url 'products:product_detail' product.pk %}">
+        {% csrf_token %}
+        <input type="number" name="price" placeholder="입찰 가격" required>
+        <button type="submit">경매 참여</button>
+        </form>
+    {% endif %}
+
+<h3>Participated Users:</h3>
+<ul>
+  {% for participant, price in participants %}
+    <li>{% if participant == participants.0.0 %}<strong>{{ participant }}</strong> ({{ price }}){% else %}{{ participant }} ({{ price }}){% endif %}</li>
+  {% empty %}
+    <li>No participants yet.</li>
+  {% endfor %}
+</ul>
+
+
 {% endblock %}
